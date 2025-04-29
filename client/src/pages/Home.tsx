@@ -5,6 +5,7 @@ import ErrorPage from "./ErrorPage";
 import UserList from '../components/Users';
 import auth from '../utils/auth';
 import Login from './Login'
+import UserProfile from "../components/UserProfile/UserProfile";
 
 const Home = () => {
 
@@ -50,7 +51,8 @@ const Home = () => {
                         <Login />
                     </div>
                 ) : (
-                    <UserList users={users} />
+                    // <UserList users={users} />
+                    <UserProfile />
                 )}
         </>
     );

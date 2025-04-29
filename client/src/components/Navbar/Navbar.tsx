@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+
 import auth from "../../utils/auth";
 
 const Navbar = () => {
@@ -24,18 +24,7 @@ const Navbar = () => {
         {
           // Conditional rendering based on loginCheck state
           !loginCheck ? (
-            // <>
-            //   {/* Render sign up button if user is not logged in */}
-            //   <button className="btn" type='button'>
-            //     <Link to='/signup'>Sign Up</Link>
-            //   </button>
-            //   {' '}
-            //   {/* Render login button if user is not logged in */}
-            //   <button className="btn" type='button'>
-            //     <Link to='/login'>Login</Link>
-            //   </button>
-            // </>
-
+            // no navbar if not logged in
             <></>
           ) : (
             // Render logout button if user is logged in

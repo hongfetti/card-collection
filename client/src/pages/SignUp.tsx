@@ -8,6 +8,7 @@ const SignUp = () => {
   // State to manage the login form data
   const [signUpData, setSignUpData] = useState<UserLogin>({
     username: '',
+    name: '',
     email: '',
     password: ''
   });
@@ -49,7 +50,18 @@ const SignUp = () => {
             onChange={handleChange}
           />
         </div>
-        {/* Username input field */}
+        {/* Name input field */}
+        <div className="form-group">
+          <label>Name</label>
+          <input 
+            className="form-input"
+            type='text'
+            name='name'
+            value={signUpData.name || ''}
+            onChange={handleChange}
+          />
+        </div>
+        {/* Email input field */}
         <div className="form-group">
           <label>Email</label>
           <input 
