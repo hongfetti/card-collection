@@ -1,29 +1,55 @@
-import dotenv from 'dotenv';
-dotenv.config();
 import express from 'express';
 import path from 'node:path';
-const root = process.cwd();
-import sequelize from './config/connection.js';
-import routes from './routes/index.js';
+import type { Request, Response } from 'express';
+// Import the ApolloServer class
+import {
+  ApolloServer,
+} from '@apollo/server';
+import {
+  expressMiddleware
+} from '@apollo/server/express4';
+import { authenticateToken } from './services/auth-service.js';
+// Import the two parts of a GraphQL schema
+import { typeDefs, resolvers } from './schemas/index.js';
+import db from './config/connection.js';
+
+
+const PORT = process.env.PORT || 3001;
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Serves static files in the entire client's dist folder
-app.use(express.static('../client/dist'));
+// Create a new instance of an Apollo server with the GraphQL schema
+const startApolloServer = async () => {
+  await server.start();
+  await db;
 
-// Middleware to parse incoming requests
-app.use(express.json());
-app.use(routes);
+  app.use(express.urlencoded({ extended: false }));
+  app.use(express.json());
 
-// Wild card route to serve the index.html file
-app.get('*', (_req, res) => {
-    res.sendFile(path.join(root, '../client/dist/index.html'));
-});
+  app.use('/graphql', expressMiddleware(server as any,
+    {
+      context: authenticateToken as any
+    }
+  ));
 
-// * Change force to true to drop tables and recreate them
-sequelize.sync({force: false}).then(() => {
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../client/dist')));
+
+    app.get('*', (_req: Request, res: Response) => {
+      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    });
+  }
+
   app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
+    console.log(`API server running on port ${PORT}!`);
+    console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
   });
-});
+
+};
+
+// Call the async function to start the server
+startApolloServer();

@@ -1,48 +1,31 @@
-import { DataTypes, Sequelize, Model, Optional } from 'sequelize';
+import { Schema, model, type Document } from "mongoose";
 
-interface DeckAttributes {
-    id: number;
-    deck_name: string;
-    image_url: string;
-    // cards: string[];
+interface IDeck extends Document {
+    deckId: string;
+    deckName: string;
+    image: string;
+    cardList: string[]; //an array of cardId (string)
 }
 
-interface DeckCreationAttributes extends Optional<DeckAttributes, 'id'> {}
-
-export class Deck extends Model<DeckAttributes, DeckCreationAttributes> implements DeckAttributes {
-    public id!: number;
-    public deck_name!: string;
-    public image_url!: string;
-    // public cards!: string[];
-}
-
-export function DeckFactory(sequelize: Sequelize): typeof Deck {
-    Deck.init(
+const deckSchema = new Schema<IDeck>({
+    deckId: {
+        type: String,
+    },
+    deckName: {
+        type: String,
+        required: true,
+    },
+    image: {
+        type: String,
+        required: true,
+    },
+    cardList: [
         {
-            id: {
-                type: DataTypes.INTEGER,
-                autoIncrement: true,
-                primaryKey: true,
-            },
-            deck_name: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
-            image_url: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
-            // cards: {
-            //     type: DataTypes.ARRAY,
-            //     allowNull: false,
-            // },
+            type: String,
         },
-        {
-            tableName: 'decks',
-            sequelize,
-            hooks: {}
-        }
-    );
+    ],
+});
 
-    return Deck
-}
+const Deck = model<IDeck>('Deck', deckSchema);
+export { type IDeck, deckSchema };
+export default Deck

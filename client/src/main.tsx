@@ -1,37 +1,28 @@
-import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './index.css';
+import ReactDOM from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
-import App from './App.tsx';
-
-import ErrorPage from './pages/ErrorPage.tsx';
-import Home from './pages/Home.tsx';
-import Login from './pages/Login.tsx';
-import SignUp from './pages/SignUp.tsx';
+import App from './App.jsx'
+import SearchBooks from './pages/SearchBooks'
+import SavedBooks from './pages/SavedBooks'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
-    errorElement: <ErrorPage />,
+    errorElement: <h1 className="display-2">Wrong page!</h1>,
     children: [
       {
         index: true,
-        element: <Home />
-      }, 
-      {
-        path: '/login',
-        element: <Login />
-      },
-      {
-        path: '/signup',
-        element: <SignUp />
-      }, 
+        element: <SearchBooks />
+      }, {
+        path: '/saved',
+        element: <SavedBooks />
+      }
     ]
   }
 ])
 
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(<RouterProvider router={router} />);
-}
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <RouterProvider router={router} />
+)

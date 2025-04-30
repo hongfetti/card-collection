@@ -1,79 +1,68 @@
-import { DataTypes, Sequelize, Model, Optional } from 'sequelize';
+import { Schema, model, type Document } from 'mongoose';
 import bcrypt from 'bcrypt';
+import { type IBook, bookSchema } from './Book.js';
 
-// Define the attributes for the User model
-interface UserAttributes {
-  id: number;
+interface IUser extends Document {
   username: string;
   name: string;
   email: string;
   password: string;
+  savedBooks: IBook[];
+  isCorrectPassword(password: string): Promise<boolean>;
+  bookCount: number;
 }
 
-// Define the optional attributes for creating a new User
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
-
-// Define the User class extending Sequelize's Model
-export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: number;
-  public username!: string;
-  public name!: string;
-  public email!: string;
-  public password!: string;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-
-  // Method to hash and set the password for the user
-  public async setPassword(password: string) {
-    const saltRounds = 10;
-    this.password = await bcrypt.hash(password, saltRounds);
-  }
-}
-
-// Define the UserFactory function to initialize the User model
-export function UserFactory(sequelize: Sequelize): typeof User {
-  User.init(
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
+const userSchema = new Schema<IUser>(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
     },
-    {
-      tableName: 'users',  // Name of the table in PostgreSQL
-      sequelize,// The Sequelize instance that connects to PostgreSQL
-      hooks: {
-        // Before creating a new user, hash and set the password
-        beforeCreate: async (user: User) => {
-          await user.setPassword(user.password);
-        },
-        // Before updating a user, hash and set the new password if it has changed
-        beforeUpdate: async (user: User) => {
-          if (user.changed('password')) {
-            await user.setPassword(user.password);
-          }
-        },
-      }
-    }
-  );
+    name: {
+      type: String,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      match: [/.+@.+\..+/, 'Must use a valid email address'],
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    // set savedBooks to be an array of data that adheres to the bookSchema
+    savedBooks: [bookSchema],
+  },
+  // set this to use virtual below
+  {
+    toJSON: {
+      virtuals: true,
+    },
+  }
+);
 
-  return User;  // Return the initialized User model
-}
+// hash user password
+userSchema.pre<IUser>('save', async function (next) {
+  if (this.isNew || this.isModified('password')) {
+    const saltRounds = 10;
+    this.password = await bcrypt.hash(this.password, saltRounds);
+  }
+
+  next();
+});
+
+// custom method to compare and validate password for logging in
+userSchema.methods.isCorrectPassword = async function (password: string): Promise<boolean> {
+  return await bcrypt.compare(password, this.password);
+};
+
+// when we query a user, we'll also get another field called `bookCount` with the number of saved books we have
+userSchema.virtual('bookCount').get(function (this: IUser) {
+  return this.savedBooks.length;
+});
+
+const User = model<IUser>('User', userSchema);
+
+export default User;
