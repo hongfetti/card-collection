@@ -44,8 +44,14 @@ const SearchBooks = () => {
 
     try {
       const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${searchInput}`
+        `https://api.scryfall.com/cards/named?fuzzy=${searchInput}`, {
+          headers: {
+            'Accept': '*/*'
+          }
+        }
       );
+
+      console.log(response)
 
       if (!response.ok) {
         throw new Error('something went wrong!');
@@ -94,7 +100,7 @@ const SearchBooks = () => {
     <>
       <div className="text-light bg-dark p-5">
         <Container>
-          <h1>Search for Books!</h1>
+          <h1>Search for Cards!</h1>
           <Form onSubmit={handleFormSubmit}>
             <Row>
               <Col xs={12} md={8}>
@@ -104,7 +110,7 @@ const SearchBooks = () => {
                   onChange={(e) => setSearchInput(e.target.value)}
                   type="text"
                   size="lg"
-                  placeholder="Search for a book"
+                  placeholder="Search for a card"
                 />
               </Col>
               <Col xs={12} md={4}>

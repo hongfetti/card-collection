@@ -1,14 +1,14 @@
 import { Schema, model, type Document } from "mongoose";
 
 interface IDeck extends Document {
-    deckId: string;
+    id: string;
     deckName: string;
     image: string;
     cardList: string[]; //an array of cardId (string)
 }
 
 const deckSchema = new Schema<IDeck>({
-    deckId: {
+    id: {
         type: String,
     },
     deckName: {

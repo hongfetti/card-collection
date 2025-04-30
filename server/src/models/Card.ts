@@ -1,13 +1,13 @@
 import { Schema, model, type Document } from "mongoose";
 
 interface ICard extends Document {
-    cardId: string;
+    id: string;
     cardName: string;
     image: string;
 }
 
 const cardSchema = new Schema<ICard>({
-    cardId: {
+    id: {
         type: String,
     },
     cardName: {
